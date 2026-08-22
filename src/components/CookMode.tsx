@@ -94,9 +94,8 @@ function StepText({
         key={`m-${i}`}
         type="button"
         className="mx-0.5 inline-flex touch-manipulation rounded-md bg-cook-accent/20 px-1.5 py-0.5 font-semibold text-cook-accent underline decoration-cook-accent/40 underline-offset-2"
-        onPointerDown={(e) => {
+        onClick={(e) => {
           e.stopPropagation();
-          e.preventDefault();
           onStartTimer(match.label, match.durationSec);
         }}
       >
@@ -453,24 +452,21 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
     const syncTimers = (now = Date.now()) => {
       if (cancelled) return;
 
-      const prev = timersRef.current;
-      const next = prev.map((timer) => tickTimer(timer, now));
-      const hasAlarming = next.some((timer) => timer.alarming);
+      setTimers((prev) => {
+        const next = prev.map((timer) => tickTimer(timer, now));
+        const hasAlarming = next.some((timer) => timer.alarming);
 
-      if (timersNeedPaint(prev, next)) {
-        setTimers(next);
-      }
-      timersRef.current = next;
+        if (hasAlarming && now - lastBeepRef.current > 1100) {
+          lastBeepRef.current = now;
+          void playAlarmSafe(ensureAudio()).catch(() => {
+            /* autoplay policy or unsupported */
+          });
+          pulseDevice();
+        }
 
-      if (hasAlarming && now - lastBeepRef.current > 1100) {
-        lastBeepRef.current = now;
-        void playAlarmSafe(ensureAudio()).catch(() => {
-          /* autoplay policy or unsupported */
-        });
-        pulseDevice();
-      }
-
-      scheduleEndTimeout(next);
+        scheduleEndTimeout(next);
+        return timersNeedPaint(prev, next) ? next : prev;
+      });
     };
 
     const startInterval = () => {
@@ -487,7 +483,6 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
         return;
       }
       syncTimers();
-      scheduleEndTimeout();
       startInterval();
       void requestWakeLock();
     };

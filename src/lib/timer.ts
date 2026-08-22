@@ -23,22 +23,40 @@ export type DurationMatch = {
   end: number;
 };
 
-/** 「5分」「30秒」「1時間」などを検出 */
+const DURATION_RE =
+  /(?:約|およそ)?(\d+(?:\.\d+)?(?:[～~〜\-－]\d+(?:\.\d+)?)?)\s*(時間|時|分|秒)/g;
+
+function normalizeDurationDigits(text: string) {
+  return text.replace(/[０-９]/g, (char) =>
+    String.fromCharCode(char.charCodeAt(0) - 0xfee0),
+  );
+}
+
+function durationFromMatch(valueRaw: string, unit: string) {
+  const range = valueRaw.match(/^(\d+(?:\.\d+)?)(?:[～~〜\-－](\d+(?:\.\d+)?))?$/);
+  const primary = Number(range?.[1] ?? valueRaw);
+  const secondary = range?.[2] ? Number(range[2]) : null;
+  const value =
+    secondary != null && Number.isFinite(secondary)
+      ? Math.max(primary, secondary)
+      : primary;
+  if (!Number.isFinite(value) || value <= 0) return null;
+  if (unit === "時間" || unit === "時") return Math.round(value * 3600);
+  if (unit === "分") return Math.round(value * 60);
+  return Math.round(value);
+}
+
+/** 「5分」「30秒」「３分」「2～3分」などを検出 */
 export function findDurationsInText(text: string): DurationMatch[] {
+  const normalized = normalizeDurationDigits(text);
   const matches: DurationMatch[] = [];
-  const re =
-    /(\d+(?:\.\d+)?)\s*(時間|時|分|秒)/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
-    const value = Number(m[1]);
-    if (!Number.isFinite(value) || value <= 0) continue;
-    const unit = m[2];
-    let durationSec = 0;
-    if (unit === "時間" || unit === "時") durationSec = Math.round(value * 3600);
-    else if (unit === "分") durationSec = Math.round(value * 60);
-    else durationSec = Math.round(value);
+  DURATION_RE.lastIndex = 0;
+  while ((m = DURATION_RE.exec(normalized)) !== null) {
+    const durationSec = durationFromMatch(m[1], m[2]);
+    if (durationSec == null) continue;
     matches.push({
-      label: m[0],
+      label: text.slice(m.index, m.index + m[0].length),
       durationSec,
       start: m.index,
       end: m.index + m[0].length,
