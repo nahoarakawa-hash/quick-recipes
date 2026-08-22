@@ -112,11 +112,28 @@ export function silenceTimer(timer: TimerState): TimerState {
   return { ...timer, alarming: false, running: false, endsAt: null };
 }
 
-export function extendTimer(timer: TimerState, minutes: number): TimerState {
-  const addSec = Math.round(minutes) * 60;
-  if (addSec <= 0) return timer;
+export function setTimerMinutes(timer: TimerState, minutes: number): TimerState {
+  return setTimerDuration(timer, Math.round(minutes) * 60);
+}
+
+export function setTimerDuration(timer: TimerState, totalSec: number): TimerState {
+  const sec = Math.round(totalSec);
+  if (sec <= 0) return timer;
   const current = timer.running ? tickTimer(timer) : timer;
-  const remaining = Math.max(0, current.remainingSec) + addSec;
+  const now = Date.now();
+  return {
+    ...current,
+    durationSec: sec,
+    remainingSec: sec,
+    running: true,
+    endsAt: now + sec * 1000,
+    alarming: false,
+  };
+}
+
+export function adjustTimerSeconds(timer: TimerState, deltaSec: number): TimerState {
+  const current = timer.running ? tickTimer(timer) : timer;
+  const remaining = Math.max(1, Math.round(current.remainingSec + deltaSec));
   const now = Date.now();
   return {
     ...current,
@@ -126,6 +143,10 @@ export function extendTimer(timer: TimerState, minutes: number): TimerState {
     endsAt: now + remaining * 1000,
     alarming: false,
   };
+}
+
+export function adjustTimerMinutes(timer: TimerState, deltaMinutes: number): TimerState {
+  return adjustTimerSeconds(timer, deltaMinutes * 60);
 }
 
 export function pauseTimer(timer: TimerState): TimerState {

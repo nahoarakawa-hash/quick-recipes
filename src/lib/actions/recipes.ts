@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { parseRecipeText } from "@/lib/import-recipe-text";
 import { createClient } from "@/lib/supabase/server";
 import type { Ingredient, Recipe, RecipeInput, Step } from "@/lib/types";
 
@@ -101,6 +102,29 @@ export async function createDraftRecipe(title: string) {
       status: "draft",
       ingredients: [],
       steps: [],
+    })
+    .select("id")
+    .single();
+
+  if (error) return { error: error.message };
+  revalidatePath("/");
+  redirect(`/recipes/${data.id}/edit`);
+}
+
+export async function createDraftFromPastedText(raw: string) {
+  const parsed = parseRecipeText(raw);
+  if ("error" in parsed) return { error: parsed.error };
+
+  const { supabase, user } = await requireUser();
+  const { data, error } = await supabase
+    .from("recipes")
+    .insert({
+      user_id: user.id,
+      title: parsed.title,
+      status: "draft",
+      ingredients: normalizeIngredients(parsed.ingredients),
+      steps: normalizeSteps(parsed.steps),
+      notes: parsed.notes,
     })
     .select("id")
     .single();

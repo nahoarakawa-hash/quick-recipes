@@ -7,17 +7,23 @@
   --ink: #2a221f;
   --ink-muted: #7a6e64;
   --line: #e8dccb;
-  --accent: #2e7d4a;
-  --accent-soft: #dceee2;
-  --rose: #c44552;
-  --rose-soft: #f3d4d7;
-  --gold: #d4af37;
+  --accent: #3ecf8e;
+  --accent-hover: #24b47e;
+  --accent-soft: #d8f6ea;
+  --accent-ink: #176b4d;
+  --on-accent: #171717;
+  --rose: #c1121f;
+  --rose-hover: #9b0e1a;
+  --rose-soft: #f6d0d4;
+  --gold: #a8926a;
+  --gold-soft: #c4a574;
+  --gold-light: #dcc99a;
   --warn: #9a3412;
   --draft: #8a7344;
   --cook-bg: #e8ddd0;
   --cook-ink: #2a221f;
-  --cook-accent: #2e7d4a;
-  --cook-gold: #d4af37;
+  --cook-accent: #3ecf8e;
+  --cook-gold: #a8926a;
   --shadow: 0 1px 0 rgba(42, 34, 31, 0.05);
 }
 
@@ -29,8 +35,12 @@
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-on-accent: var(--on-accent);
   --color-rose: var(--rose);
+  --color-rose-hover: var(--rose-hover);
   --color-rose-soft: var(--rose-soft);
   --color-gold: var(--gold);
   --color-warn: var(--warn);
@@ -54,8 +64,8 @@ body {
   min-height: 100%;
   margin: 0;
   background:
-    radial-gradient(ellipse 100% 70% at 8% -18%, #e8f0ea 0%, transparent 52%),
-    radial-gradient(ellipse 80% 50% at 100% 0%, #dceee2 0%, transparent 42%),
+    radial-gradient(ellipse 100% 70% at 8% -18%, #e5f9f0 0%, transparent 52%),
+    radial-gradient(ellipse 80% 50% at 100% 0%, #d8f6ea 0%, transparent 42%),
     var(--bg);
   color: var(--ink);
   font-family: var(--font-noto-sans-jp), "Hiragino Sans", "Noto Sans JP", sans-serif;
@@ -91,7 +101,7 @@ select {
   line-height: 1.25;
   margin: 0;
   padding-bottom: 0.45rem;
-  border-bottom: 1.5px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
 }
 
 .page-lead {
@@ -119,13 +129,21 @@ select {
   transform: scale(0.98);
 }
 
+.btn.btn-compact {
+  min-height: 1.85rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+}
+
 .btn-primary {
   background: var(--accent);
-  color: white;
+  color: var(--on-accent);
 }
 
 .btn-primary:hover {
-  background: #24663c;
+  background: var(--accent-hover);
 }
 
 .btn-rose {
@@ -135,7 +153,7 @@ select {
 }
 
 .btn-rose:hover {
-  background: #ad3844;
+  background: var(--rose-hover);
 }
 
 .btn-secondary {
@@ -149,13 +167,13 @@ select {
 }
 
 .btn-pinned {
-  background: #d2e6d8;
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
-  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  color: var(--accent-ink);
 }
 
 .btn-pinned:hover {
-  background: #c5dccb;
+  background: color-mix(in srgb, var(--accent) 28%, var(--surface));
 }
 
 .btn-danger {
@@ -215,7 +233,7 @@ select {
 
 .chip-ready {
   background: var(--accent);
-  color: white;
+  color: var(--on-accent);
 }
 
 .chip-filter {
@@ -233,32 +251,32 @@ select {
 }
 
 .chip-filter:hover {
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
 }
 
 .chip-filter[aria-pressed="true"] {
-  background: var(--accent-soft);
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
-  color: var(--accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .today-stars {
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
-  color: var(--gold);
+  color: var(--gold-soft);
   margin-bottom: 0.45rem;
 }
 
 .today-stars .sparkle {
   display: block;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--gold) 70%, transparent));
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--gold) 45%, transparent));
 }
 
 .today-stars .sparkle-sm {
   width: 8px;
   height: 8px;
-  opacity: 0.8;
+  opacity: 0.92;
   transform: rotate(12deg);
 }
 
@@ -279,8 +297,8 @@ select {
   display: block;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #e5394a;
-  box-shadow: 0 0 5px color-mix(in srgb, #e5394a 55%, transparent);
+  background: var(--rose);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--rose) 55%, transparent);
 }
 
 .today-stars .berry-sm {
@@ -296,7 +314,7 @@ select {
 @keyframes star-twinkle {
   0%,
   100% {
-    opacity: 0.35;
+    opacity: 0.72;
   }
   50% {
     opacity: 1;
@@ -308,51 +326,81 @@ select {
   overflow: hidden;
   isolation: isolate;
   border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  border: 1px solid color-mix(in srgb, #7ec8e3 35%, transparent);
   min-height: 14.5rem;
   background:
-    radial-gradient(ellipse 90% 50% at 12% 0%, #3d5588 0%, transparent 48%),
+    radial-gradient(ellipse 110% 70% at 50% 100%, rgb(126 200 227 / 0.55) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 45% at 18% 8%, rgb(255 255 255 / 0.08) 0%, transparent 55%),
     linear-gradient(
       180deg,
-      #243056 0%,
-      #2a3f6c 38%,
-      #3a4568 58%,
-      #b8927e 78%,
-      #e8ddd0 100%
+      #071428 0%,
+      #0f2344 16%,
+      #16345c 34%,
+      #1f4f7a 52%,
+      #2f6f9a 68%,
+      #4a96bf 82%,
+      #7ec8e3 100%
     );
-  color: #f4f1ea;
+  color: #f4f8fc;
   text-align: center;
   padding: 2.2rem 1.25rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-shadow: 0 1px 8px rgb(36 48 86 / 0.45);
+  text-shadow: 0 1px 8px rgb(7 20 40 / 0.55);
 }
 
 .today-sky::before {
   content: "";
   position: absolute;
-  inset: 0 0 32%;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(circle at 7% 18%, #fff 0 1.4px, rgba(255, 255, 255, 0.35) 2.4px, transparent 5px),
-    radial-gradient(circle at 16% 42%, #f0d56a 0 1.6px, rgba(212, 175, 55, 0.45) 3px, transparent 6px),
-    radial-gradient(circle at 24% 28%, #fff 0 1.2px, transparent 3.5px),
-    radial-gradient(circle at 38% 12%, #fff 0 1.8px, rgba(255, 255, 255, 0.4) 3.2px, transparent 6px),
-    radial-gradient(circle at 52% 36%, #f0d56a 0 1.7px, rgba(212, 175, 55, 0.4) 3.4px, transparent 7px),
-    radial-gradient(circle at 64% 16%, #fff 0 1.3px, transparent 4px),
-    radial-gradient(circle at 73% 48%, #fff 0 1.6px, rgba(255, 255, 255, 0.35) 2.8px, transparent 5.5px),
-    radial-gradient(circle at 84% 22%, #f0d56a 0 1.5px, transparent 5px),
-    radial-gradient(circle at 91% 40%, #fff 0 1.4px, rgba(255, 255, 255, 0.3) 2.6px, transparent 5px),
-    radial-gradient(circle at 46% 52%, #fff 0 1.2px, transparent 3.5px),
-    radial-gradient(circle at 12% 56%, #fff 0 1.3px, transparent 4px),
-    radial-gradient(circle at 31% 32%, #f0d56a 0 1.2px, transparent 4px),
-    radial-gradient(circle at 58% 8%, #fff 0 1.1px, transparent 3px),
-    radial-gradient(circle at 78% 34%, #fff 0 1.5px, rgba(255, 255, 255, 0.35) 2.6px, transparent 5px),
-    radial-gradient(circle at 96% 14%, #fff 0 1.2px, transparent 3.5px);
-  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
-  animation: star-twinkle 4.8s ease-in-out infinite;
+    radial-gradient(circle 1.2px at 8% 14%, rgb(255 255 255 / 0.95), transparent 100%),
+    radial-gradient(circle 0.9px at 14% 34%, rgb(255 255 255 / 0.55), transparent 100%),
+    radial-gradient(circle 1.1px at 21% 22%, rgb(255 255 255 / 0.85), transparent 100%),
+    radial-gradient(circle 0.8px at 28% 46%, rgb(255 255 255 / 0.45), transparent 100%),
+    radial-gradient(circle 2.4px at 34% 12%, rgb(255 255 255) 0%, rgb(214 224 240) 38%, rgb(138 158 188) 72%, transparent 100%),
+    radial-gradient(circle 1px at 41% 30%, rgb(255 255 255 / 0.6), transparent 100%),
+    radial-gradient(circle 2.2px at 47% 18%, rgb(255 255 255) 0%, rgb(210 222 238) 36%, rgb(132 152 182) 70%, transparent 100%),
+    radial-gradient(circle 0.9px at 53% 40%, rgb(255 255 255 / 0.5), transparent 100%),
+    radial-gradient(circle 1.3px at 58% 8%, rgb(255 255 255 / 0.95), transparent 100%),
+    radial-gradient(circle 1px at 63% 26%, rgb(255 255 255 / 0.65), transparent 100%),
+    radial-gradient(circle 0.8px at 69% 44%, rgb(255 255 255 / 0.4), transparent 100%),
+    radial-gradient(circle 2.3px at 74% 16%, rgb(255 255 255) 0%, rgb(212 224 240) 37%, rgb(134 154 184) 71%, transparent 100%),
+    radial-gradient(circle 0.9px at 79% 34%, rgb(255 255 255 / 0.55), transparent 100%),
+    radial-gradient(circle 2.5px at 84% 10%, rgb(255 255 255) 0%, rgb(216 226 242) 35%, rgb(140 160 190) 73%, transparent 100%),
+    radial-gradient(circle 0.8px at 88% 28%, rgb(255 255 255 / 0.48), transparent 100%),
+    radial-gradient(circle 1px at 92% 42%, rgb(255 255 255 / 0.72), transparent 100%),
+    radial-gradient(circle 1.1px at 96% 18%, rgb(255 255 255 / 0.82), transparent 100%),
+    radial-gradient(circle 0.7px at 18% 52%, rgb(255 255 255 / 0.35), transparent 100%),
+    radial-gradient(circle 0.8px at 36% 54%, rgb(255 255 255 / 0.42), transparent 100%),
+    radial-gradient(circle 0.7px at 55% 50%, rgb(255 255 255 / 0.3), transparent 100%),
+    radial-gradient(circle 0.8px at 72% 52%, rgb(255 255 255 / 0.38), transparent 100%);
+  background-repeat: no-repeat;
+  mask-image: linear-gradient(180deg, #000 0%, #000 72%, transparent 100%);
+  animation: sky-twinkle 5.2s ease-in-out infinite;
+}
+
+@keyframes sky-twinkle {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.today-sky::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 95% 100% at 50% 100%, rgb(174 224 245 / 0.35) 0%, transparent 72%);
 }
 
 .today-sky > * {
@@ -371,7 +419,7 @@ select {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.22em;
-  color: var(--gold);
+  color: rgb(220 238 252 / 0.92);
 }
 
 .cook-dusk {
@@ -385,6 +433,7 @@ select {
   font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", monospace;
   font-size: 1.35rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
   line-height: 1.1;
   color: var(--cook-accent);

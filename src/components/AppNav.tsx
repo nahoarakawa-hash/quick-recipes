@@ -36,7 +36,7 @@ export function AppNav() {
             >
               <span
                 className={`rounded-[0.65rem] px-3.5 py-1.5 transition-colors ${
-                  active ? "bg-accent-soft text-accent" : "text-ink-muted"
+                  active ? "bg-accent text-on-accent" : "text-ink-muted"
                 }`}
               >
                 {item.label}

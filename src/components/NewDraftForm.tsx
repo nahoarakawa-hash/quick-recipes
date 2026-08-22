@@ -28,7 +28,6 @@ export function NewDraftForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="例: 鶏の照り焼き"
-          autoFocus
           required
         />
       </div>

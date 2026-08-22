@@ -61,7 +61,7 @@ export default async function RecipeDetailPage({ params }: Props) {
           <ol className="space-y-3">
             {recipe.steps.map((step) => (
               <li key={step.order} className="flex gap-3">
-                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-soft text-xs font-bold text-accent">
+                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-on-accent">
                   {step.order}
                 </span>
                 <p className="whitespace-pre-wrap leading-relaxed">{step.text}</p>

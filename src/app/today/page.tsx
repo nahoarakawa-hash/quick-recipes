@@ -14,9 +14,7 @@ export default async function TodayPage() {
       <header>
         <GoldStars />
         <h1 className="page-title">今日セット</h1>
-        <p className="page-lead">
-          今夜の分を、目次から複数追加できます。保存はこの端末だけです。
-        </p>
+        <p className="page-lead">今夜の分を、目次から複数追加できます。</p>
       </header>
       <TodaySetClient recipesById={recipesById} />
     </main>

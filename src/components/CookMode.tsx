@@ -4,12 +4,14 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { loadCookSession, toggleRecipeInSession } from "@/lib/cook-session";
 import {
+  adjustTimerMinutes,
+  adjustTimerSeconds,
   createTimer,
-  extendTimer,
   findDurationsInText,
   formatRemaining,
   pauseTimer,
   resumeTimer,
+  setTimerDuration,
   silenceTimer,
   tickTimer,
   timersNeedPaint,
@@ -30,17 +32,45 @@ function getAudioContext() {
   return new Ctx();
 }
 
-function playBeep(ctx: AudioContext) {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.value = 880;
-  gain.gain.value = 0.12;
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
-  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
-  osc.stop(ctx.currentTime + 0.4);
+function playAlarm(ctx: AudioContext) {
+  const now = ctx.currentTime;
+  const notes = [
+    { freq: 1318, at: 0, dur: 0.2 },
+    { freq: 1046, at: 0.22, dur: 0.2 },
+    { freq: 1318, at: 0.44, dur: 0.32 },
+  ];
+
+  for (const note of notes) {
+    const t0 = now + note.at;
+    const t1 = t0 + note.dur;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = note.freq;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.38, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t1);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t1 + 0.02);
+  }
+}
+
+async function playAlarmSafe(ctx: AudioContext) {
+  if (ctx.state === "suspended") {
+    await ctx.resume();
+  }
+  if (ctx.state !== "running") return;
+  playAlarm(ctx);
+}
+
+function pulseDevice() {
+  try {
+    navigator.vibrate?.([220, 80, 220, 80, 320]);
+  } catch {
+    /* unsupported */
+  }
 }
 
 function StepText({
@@ -81,58 +111,125 @@ function StepText({
   return <>{parts}</>;
 }
 
-function ExtendKeypad({
+function TimerAdjustPanel({
   label,
+  initialTotalSec,
   onConfirm,
   onClose,
 }: {
   label: string;
-  onConfirm: (minutes: number) => void;
+  initialTotalSec: number;
+  onConfirm: (totalSec: number) => void;
   onClose: () => void;
 }) {
-  const [digits, setDigits] = useState("");
-  const minutes = Number(digits);
-  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "消す", "0", "決定"];
+  const initial = Math.max(1, Math.round(initialTotalSec));
+  const [parts, setParts] = useState({
+    minutes: Math.floor(initial / 60),
+    seconds: initial % 60,
+  });
+  const { minutes, seconds } = parts;
+  const totalSec = minutes * 60 + seconds;
 
-  function press(key: string) {
-    if (key === "消す") {
-      setDigits((prev) => prev.slice(0, -1));
-      return;
-    }
-    if (key === "決定") {
-      if (Number.isInteger(minutes) && minutes >= 1) onConfirm(minutes);
-      return;
-    }
-    setDigits((prev) => {
-      const next = `${prev}${key}`.replace(/^0+/, "") || (key === "0" ? "" : key);
-      return next.slice(0, 3);
+  function bumpMinutes(delta: number) {
+    setParts((prev) => ({
+      ...prev,
+      minutes: Math.max(0, prev.minutes + delta),
+    }));
+  }
+
+  function bumpSeconds(delta: number) {
+    setParts((prev) => {
+      let nextMin = prev.minutes;
+      let nextSec = prev.seconds + delta;
+      while (nextSec >= 60) {
+        nextSec -= 60;
+        nextMin += 1;
+      }
+      while (nextSec < 0) {
+        if (nextMin <= 0) {
+          nextSec = 0;
+          break;
+        }
+        nextSec += 60;
+        nextMin -= 1;
+      }
+      return { minutes: nextMin, seconds: nextSec };
     });
   }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/40 p-4 sm:items-center">
       <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
-        <p className="text-xs font-bold tracking-[0.14em] text-cook-ink/50">延長（分）</p>
+        <p className="text-xs font-bold tracking-[0.14em] text-cook-ink/50">時間（分・秒）</p>
         <p className="mt-1 text-sm text-cook-ink/60">{label}</p>
-        <p className="my-3 font-mono text-5xl font-bold tracking-wide text-cook-ink">
-          {digits || "0"}
-          <span className="ml-1 text-xl font-semibold text-cook-ink/45">分</span>
-        </p>
-        <div className="cook-keypad">
-          {keys.map((key) => (
-            <button
-              key={key}
-              type="button"
-              disabled={key === "決定" && !(Number.isInteger(minutes) && minutes >= 1)}
-              onClick={() => press(key)}
-            >
-              {key}
-            </button>
-          ))}
+        <div className="my-4 space-y-3">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-bg/40 px-3 py-2.5">
+            <span className="text-sm font-semibold text-cook-ink/70">分</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary btn-compact min-w-10"
+                onClick={() => bumpMinutes(-1)}
+                disabled={minutes <= 0 && seconds <= 1}
+                aria-label="1分短くする"
+              >
+                −
+              </button>
+              <span className="min-w-[2.5rem] text-center font-mono text-3xl font-bold text-cook-ink">
+                {minutes}
+              </span>
+              <button
+                type="button"
+                className="btn btn-secondary btn-compact min-w-10"
+                onClick={() => bumpMinutes(1)}
+                aria-label="1分長くする"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-bg/40 px-3 py-2.5">
+            <span className="text-sm font-semibold text-cook-ink/70">秒</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary btn-compact min-w-10"
+                onClick={() => bumpSeconds(-1)}
+                disabled={totalSec <= 1}
+                aria-label="1秒短くする"
+              >
+                −
+              </button>
+              <span className="min-w-[2.5rem] text-center font-mono text-3xl font-bold text-cook-ink">
+                {String(seconds).padStart(2, "0")}
+              </span>
+              <button
+                type="button"
+                className="btn btn-secondary btn-compact min-w-10"
+                onClick={() => bumpSeconds(1)}
+                aria-label="1秒長くする"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <p className="text-center font-mono text-sm text-cook-ink/55">
+            合計 {formatRemaining(totalSec)}
+          </p>
         </div>
-        <button type="button" className="btn btn-secondary mt-3 w-full" onClick={onClose}>
-          やめる
-        </button>
+        <div className="flex gap-2">
+          <button type="button" className="btn btn-secondary flex-1" onClick={onClose}>
+            やめる
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary flex-1"
+            disabled={totalSec <= 0}
+            onClick={() => onConfirm(totalSec)}
+          >
+            決定
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -141,12 +238,16 @@ function ExtendKeypad({
 function StepTimerChip({
   timer,
   onToggle,
-  onExtend,
+  onAdjustSeconds,
+  onAdjustMinutes,
+  onChange,
   onRemove,
 }: {
   timer: TimerState;
   onToggle: () => void;
-  onExtend: () => void;
+  onAdjustSeconds: (deltaSec: number) => void;
+  onAdjustMinutes: (deltaMin: number) => void;
+  onChange: () => void;
   onRemove: () => void;
 }) {
   const ended = timer.remainingSec <= 0;
@@ -157,12 +258,14 @@ function StepTimerChip({
       : timer.running
         ? "cook-timer-time"
         : "cook-timer-time is-paused";
+  const canMinusSec = timer.remainingSec > 1;
+  const canMinusMin = timer.remainingSec > 60;
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-col items-end gap-1">
       <button
         type="button"
-        className="min-w-[4.8rem] rounded-lg px-1.5 py-1 text-right"
+        className="min-w-[5.5rem] rounded-lg px-1.5 py-1 text-right"
         onClick={onToggle}
         aria-label={
           timer.alarming
@@ -182,21 +285,57 @@ function StepTimerChip({
           <span className="mt-0.5 block text-[0.65rem] font-bold text-cook-ink/45">停止</span>
         ) : null}
       </button>
-      <button
-        type="button"
-        className="btn btn-secondary min-h-8 px-2 text-xs"
-        onClick={onExtend}
-      >
-        延長
-      </button>
-      <button
-        type="button"
-        className="btn btn-secondary min-h-8 px-2 text-xs"
-        onClick={onRemove}
-        aria-label={`${timer.label}のタイマーを消す`}
-      >
-        ×
-      </button>
+      <div className="flex max-w-[14.5rem] flex-wrap justify-end gap-1">
+        <button
+          type="button"
+          className="btn btn-secondary btn-compact"
+          onClick={() => onAdjustSeconds(-15)}
+          disabled={!canMinusSec || timer.remainingSec <= 15}
+          aria-label={`${timer.label}を15秒短くする`}
+        >
+          −15s
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-compact"
+          onClick={() => onAdjustSeconds(15)}
+          aria-label={`${timer.label}を15秒長くする`}
+        >
+          +15s
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-compact"
+          onClick={() => onAdjustMinutes(-1)}
+          disabled={!canMinusMin}
+          aria-label={`${timer.label}を1分短くする`}
+        >
+          −1分
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-compact"
+          onClick={() => onAdjustMinutes(1)}
+          aria-label={`${timer.label}を1分長くする`}
+        >
+          +1分
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-compact"
+          onClick={onChange}
+        >
+          変更
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-compact"
+          onClick={onRemove}
+          aria-label={`${timer.label}のタイマーを消す`}
+        >
+          ×
+        </button>
+      </div>
     </div>
   );
 }
@@ -218,6 +357,18 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
     void audioRef.current.resume();
     return audioRef.current;
   }
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      ensureAudio();
+    };
+    window.addEventListener("pointerdown", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+    };
+  }, []);
 
   async function requestWakeLock() {
     try {
@@ -274,73 +425,86 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
     if (!timersLive) return;
 
     let cancelled = false;
-    let timeoutId = 0;
-    let worker: Worker | null = null;
-    let workerUrl: string | null = null;
+    let intervalId = 0;
+    let endTimeoutId = 0;
 
-    const paint = (now = Date.now()) => {
-      let alarming = false;
-      setTimers((prev) => {
-        const next = prev.map((timer) => tickTimer(timer, now));
-        alarming = next.some((timer) => timer.alarming);
-        return timersNeedPaint(prev, next) ? next : prev;
-      });
-      if (alarming && now - lastBeepRef.current > 800) {
-        lastBeepRef.current = now;
-        try {
-          playBeep(ensureAudio());
-        } catch {
-          /* ignore */
-        }
-      }
-    };
+    const scheduleEndTimeout = (source = timersRef.current) => {
+      window.clearTimeout(endTimeoutId);
+      if (cancelled) return;
 
-    const scheduleTimeout = () => {
-      window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => {
-        if (cancelled) return;
-        paint();
-        if (timersRef.current.some((timer) => timer.running || timer.alarming)) {
-          scheduleTimeout();
-        }
-      }, 200);
-    };
+      const now = Date.now();
+      const nextEnd = source.reduce<number | null>((nearest, timer) => {
+        if (!timer.running || timer.endsAt == null) return nearest;
+        if (nearest == null || timer.endsAt < nearest) return timer.endsAt;
+        return nearest;
+      }, null);
 
-    try {
-      workerUrl = URL.createObjectURL(
-        new Blob(["setInterval(() => postMessage(Date.now()), 200)"], {
-          type: "application/javascript",
-        }),
+      if (nextEnd == null) return;
+
+      endTimeoutId = window.setTimeout(
+        () => {
+          if (cancelled) return;
+          syncTimers();
+        },
+        Math.max(0, nextEnd - now + 30),
       );
-      worker = new Worker(workerUrl);
-      worker.onmessage = (event: MessageEvent<number>) => {
-        if (!cancelled) paint(event.data);
-      };
-    } catch {
-      scheduleTimeout();
-    }
+    };
+
+    const syncTimers = (now = Date.now()) => {
+      if (cancelled) return;
+
+      const prev = timersRef.current;
+      const next = prev.map((timer) => tickTimer(timer, now));
+      const hasAlarming = next.some((timer) => timer.alarming);
+
+      if (timersNeedPaint(prev, next)) {
+        setTimers(next);
+      }
+      timersRef.current = next;
+
+      if (hasAlarming && now - lastBeepRef.current > 1100) {
+        lastBeepRef.current = now;
+        void playAlarmSafe(ensureAudio()).catch(() => {
+          /* autoplay policy or unsupported */
+        });
+        pulseDevice();
+      }
+
+      scheduleEndTimeout(next);
+    };
+
+    const startInterval = () => {
+      window.clearInterval(intervalId);
+      if (document.visibilityState !== "visible") return;
+      intervalId = window.setInterval(() => {
+        syncTimers();
+      }, 250);
+    };
 
     const catchUp = () => {
-      if (document.visibilityState !== "visible") return;
-      paint();
+      if (document.visibilityState !== "visible") {
+        window.clearInterval(intervalId);
+        return;
+      }
+      syncTimers();
+      scheduleEndTimeout();
+      startInterval();
       void requestWakeLock();
-      if (!worker) scheduleTimeout();
     };
 
     document.addEventListener("visibilitychange", catchUp);
     window.addEventListener("pageshow", catchUp);
     window.addEventListener("focus", catchUp);
 
-    paint();
+    catchUp();
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timeoutId);
+      window.clearInterval(intervalId);
+      window.clearTimeout(endTimeoutId);
       document.removeEventListener("visibilitychange", catchUp);
       window.removeEventListener("pageshow", catchUp);
       window.removeEventListener("focus", catchUp);
-      worker?.terminate();
-      if (workerUrl) URL.revokeObjectURL(workerUrl);
     };
   }, [timersLive]);
 
@@ -401,7 +565,7 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
         <header className="mb-4">
           <GoldStars />
           <div className="flex items-center justify-between gap-3">
-            <Link href="/today" className="text-sm font-semibold text-accent">
+            <Link href="/today" className="text-sm font-semibold text-accent-ink">
               ← 今日セット
             </Link>
             <p className="text-xs tracking-[0.16em] text-cook-gold">COOK MODE</p>
@@ -435,7 +599,7 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
         {active && (
           <article className="space-y-6">
             <div>
-              <h1 className="border-b border-cook-gold/70 pb-2 text-3xl font-bold leading-tight tracking-wide">
+              <h1 className="border-b-2 border-cook-gold pb-2 text-3xl font-bold leading-tight tracking-wide">
                 {active.title}
               </h1>
               {active.role_tag && (
@@ -464,7 +628,7 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
 
             <section>
               <h2 className="mb-2 text-xs font-bold tracking-[0.14em] text-cook-ink/50">
-                手順（分数タップでタイマー）
+                手順（時間タップでタイマー。分・秒で変えられます）
               </h2>
               <ol className="space-y-3">
                 {active.steps.map((step) => {
@@ -517,7 +681,13 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
                                   key={timer.id}
                                   timer={timer}
                                   onToggle={() => onTimeTap(timer)}
-                                  onExtend={() => setExtendId(timer.id)}
+                                  onAdjustSeconds={(delta) =>
+                                    updateTimer(timer.id, (item) => adjustTimerSeconds(item, delta))
+                                  }
+                                  onAdjustMinutes={(delta) =>
+                                    updateTimer(timer.id, (item) => adjustTimerMinutes(item, delta))
+                                  }
+                                  onChange={() => setExtendId(timer.id)}
                                   onRemove={() =>
                                     setTimers((prev) => prev.filter((item) => item.id !== timer.id))
                                   }
@@ -548,11 +718,13 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
       </div>
 
       {extending && (
-        <ExtendKeypad
+        <TimerAdjustPanel
           label={extending.label}
+          initialTotalSec={Math.max(1, Math.round(extending.remainingSec))}
           onClose={() => setExtendId(null)}
-          onConfirm={(minutes) => {
-            updateTimer(extending.id, (timer) => extendTimer(timer, minutes));
+          onConfirm={(totalSec) => {
+            ensureAudio();
+            updateTimer(extending.id, (timer) => setTimerDuration(timer, totalSec));
             setExtendId(null);
           }}
         />

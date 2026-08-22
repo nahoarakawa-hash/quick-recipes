@@ -35,6 +35,7 @@ import {
   tocRoleTagFromGroupKey,
 } from "@/lib/recipe-utils";
 import { TodayPinButton } from "@/components/TodayPinButton";
+import { clearCookSession, loadCookSession } from "@/lib/cook-session";
 
 type TocItems = Record<string, string[]>;
 
@@ -115,6 +116,7 @@ export function RecipeToc({ recipes, initialQuery = "" }: Props) {
   const [items, setItems] = useState<TocItems>(() => recipesToTocItems(recipes));
   const [activeId, setActiveId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [todayCount, setTodayCount] = useState(0);
   const [pending, startTransition] = useTransition();
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -124,6 +126,17 @@ export function RecipeToc({ recipes, initialQuery = "" }: Props) {
 
   useEffect(() => {
     setVisibleTags(readSavedFilters());
+  }, []);
+
+  useEffect(() => {
+    const sync = () => setTodayCount(loadCookSession().recipeIds.length);
+    sync();
+    window.addEventListener("storage", sync);
+    window.addEventListener("cook-session-change", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("cook-session-change", sync);
+    };
   }, []);
 
   useEffect(() => {
@@ -306,6 +319,15 @@ export function RecipeToc({ recipes, initialQuery = "" }: Props) {
     return (items[key] ?? []).length > 0;
   });
 
+  function clearToday() {
+    if (todayCount === 0) return;
+    if (!window.confirm("今日セットをすべてクリアしますか？")) return;
+    startTransition(() => {
+      clearCookSession();
+      setTodayCount(0);
+    });
+  }
+
   return (
     <div className="space-y-5">
       <div className="field">
@@ -318,6 +340,21 @@ export function RecipeToc({ recipes, initialQuery = "" }: Props) {
           autoComplete="off"
         />
       </div>
+      {todayCount > 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 shadow-[var(--shadow)]">
+          <p className="text-sm text-ink">
+            今日に追加 <span className="font-semibold">{todayCount}</span> 件
+          </p>
+          <button
+            type="button"
+            className="btn btn-secondary min-h-9 px-3 text-sm"
+            disabled={pending}
+            onClick={clearToday}
+          >
+            一括クリア
+          </button>
+        </div>
+      )}
       {hasRecipes && (
         <div className="space-y-2">
           <p className="text-xs font-bold tracking-[0.12em] text-ink-muted">分類</p>
@@ -358,7 +395,7 @@ export function RecipeToc({ recipes, initialQuery = "" }: Props) {
 
       {!hasRecipes ? (
         <p className="rounded-xl border border-dashed border-line bg-surface px-4 py-8 text-center text-ink-muted">
-          レシピがまだありません。名前だけ追加から始められます。
+          レシピがまだありません。追加から始められます。
         </p>
       ) : searching ? (
         <SearchResults recipes={filtered} visibleTags={visibleTags} />

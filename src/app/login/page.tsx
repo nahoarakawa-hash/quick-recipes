@@ -13,7 +13,7 @@ export default async function LoginPage({ searchParams }: Props) {
   return (
     <main className="flex min-h-[80vh] flex-col justify-center gap-8 py-10">
       <div>
-        <p className="text-xs font-bold tracking-[0.18em] text-accent">QUICK RECIPES</p>
+        <p className="text-xs font-bold tracking-[0.18em] text-accent-ink">QUICK RECIPES</p>
         <h1 className="page-title mt-2">自分専用のクイックレシピ</h1>
         <p className="page-lead">
           手順を必要最小限に圧縮したメモ。一人用・Googleログイン。

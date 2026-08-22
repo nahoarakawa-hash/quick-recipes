@@ -8,7 +8,7 @@ export function SignOutButton() {
   return (
     <button
       type="button"
-      className="btn btn-secondary min-h-9 px-3 text-sm"
+      className="btn btn-secondary btn-compact shrink-0"
       disabled={pending}
       onClick={() => startTransition(async () => signOut())}
     >

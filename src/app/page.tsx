@@ -19,7 +19,7 @@ export default async function HomePage({ searchParams }: Props) {
         <div>
           <GoldStars />
           <h1 className="page-title">目次</h1>
-          <p className="page-lead">紙バインダーのページ番号代わり。主菜は魚か肉、副菜は和洋中で探す。</p>
+          <p className="page-lead">主菜は魚か肉、副菜は和洋中で探す。</p>
         </div>
         <SignOutButton />
       </header>

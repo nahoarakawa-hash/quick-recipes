@@ -132,11 +132,23 @@ function SortableIngredientRow({
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className={`grid grid-cols-[auto_1.2fr_0.8fr_0.9fr_auto] gap-2 ${
+      className={`grid grid-cols-[auto_1fr_auto] gap-2 rounded-xl border border-line/70 bg-bg/30 p-2.5 sm:grid-cols-[auto_minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.9fr)_auto] sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 ${
         isDragging ? "relative z-10 opacity-80" : ""
       }`}
     >
-      <DragHandle attributes={attributes} listeners={listeners} label="材料の並べ替え" />
+      <DragHandle
+        attributes={attributes}
+        listeners={listeners}
+        label="材料の並べ替え"
+      />
+      <button
+        type="button"
+        className="btn btn-secondary col-start-3 row-start-1 min-h-9 px-2 text-sm sm:col-start-5"
+        onClick={onRemove}
+        aria-label="材料行を削除"
+      >
+        ×
+      </button>
       <input
         aria-label={`材料名 ${index + 1}`}
         placeholder="名前"
@@ -144,7 +156,7 @@ function SortableIngredientRow({
         onChange={(e) => onChange({ name: e.target.value })}
         onKeyDown={handleEnter}
         data-ing-name={row.id}
-        className="rounded-lg border border-line bg-surface px-2.5 py-2"
+        className="col-span-3 col-start-1 row-start-2 min-w-0 rounded-lg border border-line bg-surface px-2.5 py-2 sm:col-span-1 sm:col-start-2 sm:row-start-1"
       />
       <input
         aria-label={`分量 ${index + 1}`}
@@ -152,7 +164,7 @@ function SortableIngredientRow({
         value={row.amount}
         onChange={(e) => onChange({ amount: e.target.value })}
         onKeyDown={handleEnter}
-        className="rounded-lg border border-line bg-surface px-2.5 py-2"
+        className="col-start-1 row-start-3 min-w-0 rounded-lg border border-line bg-surface px-2.5 py-2 sm:col-start-3 sm:row-start-1"
       />
       <input
         aria-label={`切り方 ${index + 1}`}
@@ -160,16 +172,8 @@ function SortableIngredientRow({
         value={row.prep ?? ""}
         onChange={(e) => onChange({ prep: e.target.value })}
         onKeyDown={handleEnter}
-        className="rounded-lg border border-line bg-surface px-2.5 py-2"
+        className="col-span-2 col-start-2 row-start-3 min-w-0 rounded-lg border border-line bg-surface px-2.5 py-2 sm:col-span-1 sm:col-start-4 sm:row-start-1"
       />
-      <button
-        type="button"
-        className="btn btn-secondary min-h-9 px-2 text-sm"
-        onClick={onRemove}
-        aria-label="材料行を削除"
-      >
-        ×
-      </button>
     </div>
   );
 }
@@ -211,7 +215,7 @@ function SortableStepRow({
       </span>
       <textarea
         aria-label={`手順 ${index + 1}`}
-        rows={2}
+        rows={Math.min(16, Math.max(2, row.text.split("\n").length + 1))}
         value={row.text}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleEnter}
@@ -437,7 +441,7 @@ export function RecipeForm({ recipe }: Props) {
             items={ingredients.map((item) => item.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-2">
+            <div className="space-y-3 sm:space-y-2">
               {ingredients.map((ing, index) => (
                 <SortableIngredientRow
                   key={ing.id}
