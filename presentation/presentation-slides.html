@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Recipes — 発表スライド</title>
+  <style>
+    :root {
+      --supabase-green: #3ecf8e;
+      --supabase-green-hover: #00c573;
+      --supabase-green-dark: #1f4b37;
+      --supabase-green-muted: #006239;
+      --supabase-green-soft: rgba(62, 207, 142, 0.18);
+      --supabase-green-border: rgba(62, 207, 142, 0.45);
+      --supabase-dark: #171717;
+
+      --bg: #fbf6ef;
+      --surface: #fffdf8;
+      --ink: #2a221f;
+      --ink-muted: #7a6e64;
+      --line: #e8dccb;
+      --accent: var(--supabase-green);
+      --accent-ink: #0f8f5a; /* 緑字・強調テキスト（マークより濃く、視認性優先） */
+      --gold: #d4af37;
+      --bubble: var(--supabase-green); /* スクショ番号・吹き出しバッジ */
+      --bubble-bg: var(--supabase-green-soft);
+      --text-width-extra: 3em; /* 一行あたり約3文字分、改行を減らす */
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .deck { height: 100vh; position: relative; }
+
+    .slide {
+      display: none;
+      height: 100vh;
+      background:
+        radial-gradient(ellipse 100% 70% at 8% -18%, rgba(62, 207, 142, 0.16) 0%, transparent 52%),
+        radial-gradient(ellipse 80% 50% at 100% 0%, rgba(62, 207, 142, 0.1) 0%, transparent 42%),
+        var(--bg);
+    }
+    .slide.active { display: flex; }
+
+    /* テキスト中心スライド */
+    .slide--text {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 3rem 2.5rem;
+    }
+
+    .stars {
+      color: var(--gold);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+    }
+
+    .slide h1 {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .slide .sub {
+      font-size: 1rem;
+      color: var(--ink-muted);
+      margin: 0 0 2rem;
+    }
+
+    .slide .lead {
+      font-size: clamp(1.15rem, 3vw, 1.45rem);
+      line-height: 1.75;
+      max-width: calc(36rem + var(--text-width-extra));
+      margin: 0;
+    }
+    .slide .lead strong {
+      color: var(--accent-ink);
+      font-weight: 700;
+    }
+
+    .hook {
+      font-size: clamp(1.2rem, 3.2vw, 1.55rem);
+      line-height: 1.9;
+      max-width: calc(32rem + var(--text-width-extra));
+      margin: 0;
+    }
+    .hook__line { display: block; }
+    .hook__line--single { white-space: nowrap; }
+    .hook .q {
+      display: block;
+      margin-top: 1.5rem;
+      font-size: clamp(1.35rem, 3.5vw, 1.7rem);
+      font-weight: 700;
+      color: var(--accent-ink);
+    }
+
+    /* スライド2：紙レシピ写真＋フック文 */
+    .slide--hook {
+      padding: 2rem 2.5rem;
+    }
+    .hook-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 38%) 1fr;
+      gap: 2rem 2.25rem;
+      align-items: center;
+      width: min(56rem, 100%);
+      max-height: calc(100vh - 4rem);
+    }
+    .hook-photo {
+      margin: 0;
+      min-width: 0;
+    }
+    .hook-photo img {
+      display: block;
+      width: 100%;
+      max-height: min(68vh, 28rem);
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 0.75rem;
+      border: 2px solid var(--line);
+      box-shadow: 0 8px 24px rgba(42, 34, 31, 0.1);
+    }
+    .hook-body {
+      text-align: left;
+      min-width: 0;
+    }
+    .slide--hook .stars {
+      margin-bottom: 0.75rem;
+      text-align: left;
+    }
+    .slide--hook .hook {
+      max-width: none;
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+      line-height: 1.85;
+    }
+
+    @media (max-width: 720px) {
+      .hook-layout {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+      .hook-photo img {
+        max-height: 36vh;
+      }
+    }
+
+    .why-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem;
+      max-width: calc(34rem + var(--text-width-extra));
+      text-align: left;
+    }
+    .why-list li {
+      position: relative;
+      padding: 1rem 0 1rem 1.5rem;
+      border-bottom: 1px solid var(--line);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      line-height: 1.65;
+    }
+    .why-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1.35rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .why-list em {
+      font-style: normal;
+      font-weight: 700;
+      color: var(--accent-ink);
+    }
+
+    .closing-line {
+      font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+      font-weight: 700;
+      color: var(--accent-ink);
+      max-width: calc(28rem + var(--text-width-extra));
+      line-height: 1.6;
+    }
+
+    .insight-quote {
+      font-size: clamp(1.25rem, 3.5vw, 1.65rem);
+      font-weight: 700;
+      color: var(--accent-ink);
+      line-height: 1.75;
+      max-width: calc(30rem + var(--text-width-extra));
+      margin: 1.5rem 0 0;
+      padding: 1.25rem 1.5rem;
+      border-left: 4px solid var(--accent);
+      text-align: left;
+      background: var(--bubble-bg);
+      border-radius: 0 0.75rem 0.75rem 0;
+    }
+
+    .thanks-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0;
+      max-width: calc(32rem + var(--text-width-extra));
+      text-align: left;
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      line-height: 1.8;
+    }
+    .thanks-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .slide--finale .thanks-list {
+      max-width: min(calc(38rem + var(--text-width-extra)), 92vw);
+    }
+    .slide--finale .thanks-list li {
+      white-space: nowrap;
+    }
+
+    /* スクショ＋吹き出しスライド */
+    .slide--feature {
+      flex-direction: column;
+      padding: 1.25rem 1.5rem 3rem;
+    }
+
+    .feat-head {
+      flex-shrink: 0;
+      margin-bottom: 0.75rem;
+    }
+    .feat-head h2 {
+      font-size: clamp(1.15rem, 2.8vw, 1.45rem);
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .feat-head h2 span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .feat-stage {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(200px, 280px) 1fr;
+      gap: 1rem 1.25rem;
+      align-items: center;
+      min-height: 0;
+    }
+
+    @media (max-width: 720px) {
+      .feat-stage { grid-template-columns: 1fr; align-items: start; }
+    }
+
+    .phone-shot {
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto;
+      position: relative;
+      border: 2px solid #cbb89a;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(42, 34, 31, 0.08);
+    }
+    .phone-shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .mark {
+      position: absolute;
+      z-index: 2;
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 999px;
+      background: var(--bubble);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 2px #fff;
+    }
+
+    .callouts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      justify-content: center;
+    }
+    .bubble {
+      position: relative;
+      background: var(--bubble-bg);
+      border: 1.5px solid var(--supabase-green-border);
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.75rem 0.6rem 0.85rem;
+      font-size: 0.88rem;
+    }
+    .bubble::before {
+      content: attr(data-n);
+      position: absolute;
+      left: -0.5rem;
+      top: 0.55rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 999px;
+      background: var(--bubble);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 3px var(--bg);
+    }
+    .bubble strong {
+      display: block;
+      color: var(--accent-ink);
+      font-size: 0.78rem;
+      margin-bottom: 0.1rem;
+    }
+    .bubble p {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .callouts--dense {
+      gap: 0.35rem;
+    }
+    .callouts--dense .bubble {
+      padding: 0.45rem 0.65rem 0.45rem 0.75rem;
+      font-size: 0.82rem;
+    }
+    .callouts--dense .bubble strong {
+      font-size: 0.72rem;
+    }
+
+    .demo-note {
+      position: fixed;
+      top: 0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--supabase-dark);
+      color: #fafafa;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+      display: none;
+      z-index: 10;
+    }
+    .demo-note.show { display: block; }
+
+    .page-num {
+      position: fixed;
+      bottom: 1rem;
+      left: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      z-index: 10;
+    }
+    .nav-hint {
+      position: fixed;
+      bottom: 1rem;
+      right: 1.25rem;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      opacity: 0.7;
+      z-index: 10;
+    }
+
+    /* 最終スライド：スタイリッシュなイルミネーション */
+    .slide--finale {
+      position: relative;
+      overflow: hidden;
+    }
+    .slide--finale > *:not(.finale-frame) {
+      position: relative;
+      z-index: 2;
+    }
+
+    .finale-frame {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .finale-frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(46, 155, 255, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 40% at 50% 100%, rgba(255, 59, 74, 0.04) 0%, transparent 60%);
+    }
+
+    .finale-garland {
+      position: absolute;
+      left: 3%;
+      right: 3%;
+      height: clamp(1.75rem, 3.5vh, 2.5rem);
+      pointer-events: none;
+    }
+    .finale-garland--top { top: 1rem; }
+    .finale-garland--bottom { bottom: 2.25rem; }
+    .finale-garland svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .garland-line {
+      stroke: rgba(107, 94, 74, 0.18);
+      stroke-width: 0.5;
+    }
+    .garland-dot circle {
+      stroke: none;
+    }
+    .garland-dot--c-gold circle {
+      fill: #ffcc00;
+      filter: drop-shadow(0 0 3px #ffe566) drop-shadow(0 0 10px rgba(255, 204, 0, 0.85));
+    }
+    .garland-dot--c-red circle {
+      fill: #ff3b4a;
+      filter: drop-shadow(0 0 3px #ff6b76) drop-shadow(0 0 10px rgba(255, 59, 74, 0.8));
+    }
+    .garland-dot--c-green circle {
+      fill: #00e676;
+      filter: drop-shadow(0 0 3px #5dffb0) drop-shadow(0 0 10px rgba(0, 230, 118, 0.8));
+    }
+    .garland-dot--c-blue circle {
+      fill: #2e9bff;
+      filter: drop-shadow(0 0 3px #6bb8ff) drop-shadow(0 0 10px rgba(46, 155, 255, 0.8));
+    }
+    .garland-dot--c-orange circle {
+      fill: #ff8a1f;
+      filter: drop-shadow(0 0 3px #ffb05c) drop-shadow(0 0 10px rgba(255, 138, 31, 0.8));
+    }
+    .garland-dot--c-magenta circle {
+      fill: #e040fb;
+      filter: drop-shadow(0 0 3px #ea6dff) drop-shadow(0 0 10px rgba(224, 64, 251, 0.75));
+    }
+    .garland-dot--c-cyan circle {
+      fill: #00e5ff;
+      filter: drop-shadow(0 0 3px #66f0ff) drop-shadow(0 0 10px rgba(0, 229, 255, 0.75));
+    }
+    .garland-dot--c-purple circle {
+      fill: #9b5cff;
+      filter: drop-shadow(0 0 3px #b88aff) drop-shadow(0 0 10px rgba(155, 92, 255, 0.75));
+    }
+    .garland-dot--pulse {
+      animation: garland-glow 5.5s ease-in-out infinite;
+      animation-delay: calc(var(--d, 0) * 0.4s);
+    }
+
+    @keyframes garland-glow {
+      0%, 100% { opacity: 0.88; }
+      50% { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .garland-dot--pulse {
+        animation: none;
+      }
+    }
+
+    @media print {
+      html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: #fff !important;
+      }
+      .deck {
+        height: auto !important;
+        position: static !important;
+      }
+      .slide {
+        display: flex !important;
+        page-break-after: always;
+        break-after: page;
+        height: 100vh;
+        min-height: 100vh;
+        overflow: hidden;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+      .nav-hint, .page-num, .demo-note { display: none !important; }
+      .phone-shot img,
+      .hook-photo img {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-note" id="demo-note">ここから実機デモ（目次 → 今日セット → 調理）</div>
+
+  <div class="deck" id="deck">
+    <!-- 1 表紙 -->
+    <section class="slide slide--text active" data-label="1">
+      <div class="stars">★ ★ ★</div>
+      <h1>Quick Recipes</h1>
+      <p class="sub">AI-Driven School 卒業制作</p>
+      <p class="lead">
+        <strong>料理をクイックにつくるための<br />
+          自分専用のレシピ Web アプリ</strong>
+      </p>
+    </section>
+
+    <!-- 2 フック -->
+    <section class="slide slide--text slide--hook" data-label="2">
+      <div class="hook-layout">
+        <figure class="hook-photo">
+          <img src="screenshots/00-paper-on-hood.png" alt="レンジフード横にとめた手書きレシピ" />
+        </figure>
+        <div class="hook-body">
+          <div class="stars">★ ★ ★</div>
+          <p class="hook">
+            <span class="hook__line hook__line--single">よく作る料理のレシピは、要領よくまとめて紙に書く</span>
+            <span class="hook__line">作るときにその紙を引っ張りだし壁に張る</span>
+            <span class="hook__line">調理中、その紙を見て、また作業に戻る</span>
+            <span class="q">この動作、毎回繰り返してるな。。</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 なぜ -->
+    <section class="slide slide--text" data-label="3">
+      <div class="stars">★ ★ ★</div>
+      <h1 style="font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: 1.5rem;">なぜ作ったか</h1>
+      <ul class="why-list">
+        <li>
+          今日作りたい料理のレシピが書かれたページを抜いて<br />
+          レンジフードの横にとめる<br />
+          <em>「どのあたりにあったっけ？」</em>
+        </li>
+        <li>
+          作業工程覚えているうちにレシピ集に写さなきゃ<br />
+          <em>「眠い」</em>
+        </li>
+        <li>
+          時間がなくてレシピ集に転記できず、<br />
+          何度も同じレシピを検索して作る<br />
+          <em>「こないだ作ったあれ、どこに載ってたっけ」</em>
+         
+        </li>
+      </ul>
+      <p class="closing-line">
+        紙を捨てたいのではなく、<br />
+        便利なツールを使い続けるために<br />
+        手間をかけないやりかたにしたかった。
+      </p>
+    </section>
+
+    <!-- ※ 次：実機デモ（スライドなし） -->
+
+    <!-- 4 目次 -->
+    <section class="slide slide--feature" data-label="4">
+      <header class="feat-head">
+        <h2>目次 <span>紙バインダーのページ番号代わり</span></h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/01-toc.png" alt="目次" />
+          <div class="mark" style="top: 24%; left: 52%;">1</div>
+          <div class="mark" style="top: 35%; left: 38%;">2</div>
+          <div class="mark" style="top: 59%; right: 3%;">3</div>
+          <div class="mark" style="top: 68%; left: 30%;">4</div>
+          <div class="mark" style="bottom: 16%; left: 50%; transform: translateX(-50%);">5</div>
+        </div>
+        <div class="callouts callouts--dense">
+          <div class="bubble" data-n="1">
+            <strong>材料名・タイトル検索</strong>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>主菜は魚／肉、副菜は和洋中で絞り込み</strong>
+          </div>
+          <div class="bubble" data-n="3">
+            <strong>今日作るものを『今日セット』に</strong>
+          </div>
+          <div class="bubble" data-n="4">
+            <strong>主な材料をこの画面で確認できる</strong>
+          </div>
+          <div class="bubble" data-n="5">
+            <strong>画面の切り替え</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 今日セット -->
+    <section class="slide slide--feature" data-label="5">
+      <header class="feat-head">
+        <h2>今日セット <span>今夜の分だけを手元に</span></h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/05-today.png" alt="今日セット" />
+          <div class="mark" style="top: 42%; left: 42%;">1</div>
+          <div class="mark" style="top: 58%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>今夜のレシピだけ並べる</strong>
+            <p>紙を何枚も抜き差ししなくてよい。順番の入れ替え・外しもここだけ。</p>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>調理モードへ</strong>
+            <p>セットした内容のまま、キッチン向けの大きい表示へ進む。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 調理モード -->
+    <section class="slide slide--feature" data-label="6">
+      <header class="feat-head">
+        <h2>調理モード <span>作業台のそばで見る画面</span></h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/06-cook.png" alt="調理モード" />
+          <div class="mark" style="top: 3%; left: 21%;">1</div>
+          <div class="mark" style="top: 34%; left: 50%; transform: translateX(-50%);">2</div>
+          <div class="mark" style="top: 78%; left: 55%;">3</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>今日セットの切替</strong>
+            <p>今夜の複数品を、タブで切り替え。別の紙が目に入らない。</p>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>大きい文字の材料・手順</strong>
+            <p>作業台のそばのスマホで読める。「レンジフード横の紙」を見上げなくてよい。</p>
+          </div>
+          <div class="bubble" data-n="3">
+            <strong>分数タップでタイマー</strong>
+            <p>分数をタップで作動 → キッチンタイマー不要。並行する作業ごとにタイマーを同時に回せる。短縮・延長も可。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 レシピを登録 -->
+    <section class="slide slide--feature" data-label="7">
+      <header class="feat-head">
+        <h2>レシピを登録 <span>スクショやテキストから下書きを作る</span></h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/02-new.png" alt="レシピ追加" />
+          <div class="mark" style="top: 32%; left: 50%; transform: translateX(-50%);">1</div>
+          <div class="mark" style="top: 62%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>スクショ／テキスト貼り付け</strong>
+            <p>ネットや写真の文字を貼って下書き化。手書きの「時間をかけたのに」を下げる入口。</p>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>名前だけ下書き</strong>
+            <p>思いついたら名前だけ置ける。完成前でも一覧に残せる。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 レシピ編集（名前・材料） -->
+    <section class="slide slide--feature" data-label="8">
+      <header class="feat-head">
+        <h2>レシピ編集 <span>レシピの内容を入力・修正する</span></h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/03-edit-top.png" alt="レシピ編集（名前・材料）" />
+          <div class="mark" style="top: 28%; left: 50%; transform: translateX(-50%);">1</div>
+          <div class="mark" style="top: 58%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>名前・分類・状態</strong>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>材料の入力。調味料はここではなく「手順」に入力。</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 レシピ編集（手順） -->
+    <section class="slide slide--feature" data-label="9">
+      <header class="feat-head">
+        <h2>レシピ編集（手順） <span>続きの画面</span></h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/03-edit-steps.png" alt="レシピ編集（手順）" />
+          <div class="mark" style="top: 38%; left: 50%; transform: translateX(-50%);">1</div>
+          <div class="mark" style="top: 72%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>手順の入力</strong>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>保存する</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 今日セット（空） -->
+    <section class="slide slide--feature" data-label="10">
+      <header class="feat-head">
+        <h2>今日セット（空のとき）</h2>
+      </header>
+      <div class="feat-stage">
+        <div class="phone-shot">
+          <img src="screenshots/04-today-empty.png" alt="今日セット（空）" />
+          <div class="mark" style="top: 44%; left: 50%; transform: translateX(-50%);">1</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>何も入っていないときの画面は夜空のイラスト</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 気づき（山場） -->
+    <section class="slide slide--text" data-label="11">
+      <div class="stars">★ ★ ★</div>
+      <h1 style="font-size: clamp(1.4rem, 3.8vw, 1.9rem);">使って気づいたこと</h1>
+      <p class="lead" style="margin-top: 1rem; text-align: left; max-width: calc(32rem + 3em);">
+        減らしたかったのは、レシピを探したり、転記したり。<br />
+        作ってみたら、それ以外の動作まで、減らせていた。
+      </p>
+      <p class="insight-quote">
+        体勢を変えたり、目で探すことを、<br />
+        無意識に毎日繰り返していた
+      </p>
+      <p class="lead" style="margin-top: 1.25rem; text-align: left; max-width: calc(32rem + 3em);">
+        料理人の夫に、「自分も使いたい」と言ってもらえた。
+      </p>
+    </section>
+
+    <!-- 12 締め -->
+    <section class="slide slide--text slide--finale" data-label="12">
+      <div class="finale-frame" aria-hidden="true">
+        <div class="finale-garland finale-garland--top">
+          <svg viewBox="0 0 920 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line class="garland-line" x1="72" y1="14" x2="848" y2="14"/>
+            <g class="garland-dot garland-dot--c-gold garland-dot--pulse" style="--d:0" transform="translate(100 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-red" transform="translate(184 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-green garland-dot--pulse" style="--d:1" transform="translate(268 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-blue" transform="translate(352 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-orange garland-dot--pulse" style="--d:2" transform="translate(436 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-magenta" transform="translate(520 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-cyan garland-dot--pulse" style="--d:3" transform="translate(604 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-purple" transform="translate(688 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-gold garland-dot--pulse" style="--d:4" transform="translate(772 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-red" transform="translate(856 14)"><circle r="4"/></g>
+          </svg>
+        </div>
+        <div class="finale-garland finale-garland--bottom">
+          <svg viewBox="0 0 920 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line class="garland-line" x1="72" y1="14" x2="848" y2="14"/>
+            <g class="garland-dot garland-dot--c-cyan garland-dot--pulse" style="--d:1" transform="translate(100 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-purple" transform="translate(184 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-orange garland-dot--pulse" style="--d:2" transform="translate(268 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-magenta" transform="translate(352 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-blue garland-dot--pulse" style="--d:3" transform="translate(436 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-green" transform="translate(520 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-red garland-dot--pulse" style="--d:4" transform="translate(604 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-gold" transform="translate(688 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-cyan garland-dot--pulse" style="--d:0" transform="translate(772 14)"><circle r="4"/></g>
+            <g class="garland-dot garland-dot--c-purple" transform="translate(856 14)"><circle r="4"/></g>
+          </svg>
+        </div>
+      </div>
+      <div class="stars">★ ★ ★</div>
+      <h1 style="font-size: clamp(1.4rem, 3.8vw, 1.9rem);">ありがとうございました</h1>
+      <ul class="thanks-list">
+        <li>自分が便利だと思っているものの中にも、<strong>不便があった</strong></li>
+        <li>習ったことを生かして快適になるツールをこれからも作っていきたい</li>
+        <li>みなさんのツールづくりの話も、たくさん参考にさせてもらいました</li>
+      </ul>
+    </section>
+  </div>
+
+  <span class="page-num" id="page-num">1 / 12</span>
+  <span class="nav-hint">← → で切替 · F11 で全画面</span>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const demoNote = document.getElementById("demo-note");
+    let index = 0;
+
+    function show(i) {
+      index = Math.max(0, Math.min(i, slides.length - 1));
+      slides.forEach((s, n) => s.classList.toggle("active", n === index));
+      const label = slides[index].dataset.label || String(index + 1);
+      document.getElementById("page-num").textContent =
+        `${label} / ${slides.length}`;
+      // スライド3の次（実機デモ）の合図
+      demoNote.classList.toggle("show", index === 2);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        show(index + 1);
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        show(index - 1);
+      }
+      if (e.key === "Home") show(0);
+      if (e.key === "End") show(slides.length - 1);
+    });
+
+    document.getElementById("deck").addEventListener("click", (e) => {
+      const w = window.innerWidth;
+      if (e.clientX > w * 0.55) show(index + 1);
+      else show(index - 1);
+    });
+  </script>
+</body>
+</html>

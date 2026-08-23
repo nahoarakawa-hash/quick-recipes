@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Recipes — 画面機能図解</title>
+  <style>
+    :root {
+      /* Supabase brand */
+      --supabase-green: #3ecf8e;
+      --supabase-green-hover: #00c573;
+      --supabase-green-dark: #1f4b37;
+      --supabase-green-muted: #006239;
+      --supabase-green-soft: rgba(62, 207, 142, 0.14);
+      --supabase-green-border: rgba(62, 207, 142, 0.35);
+      --supabase-dark: #171717;
+
+      --bg: #fbf6ef;
+      --bg-deep: #f0e6d8;
+      --surface: #fffdf8;
+      --ink: #2a221f;
+      --ink-muted: #7a6e64;
+      --line: #e8dccb;
+      --accent: var(--supabase-green);
+      --accent-hover: var(--supabase-green-hover);
+      --accent-ink: var(--supabase-green-dark);
+      --on-accent: var(--supabase-dark);
+      --rose: #c1121f;
+      --gold: #d4af37;
+      --draft: #8a7344;
+      --cook-bg: #e8ddd0;
+      --bubble: var(--supabase-green-muted);
+      --bubble-bg: var(--supabase-green-soft);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 100% 70% at 8% -18%, rgba(62, 207, 142, 0.16) 0%, transparent 52%),
+        radial-gradient(ellipse 80% 50% at 100% 0%, rgba(62, 207, 142, 0.1) 0%, transparent 42%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 0.35rem;
+    }
+    .lead {
+      color: var(--ink-muted);
+      margin: 0 0 2rem;
+      font-size: 0.95rem;
+    }
+
+    .screen-block {
+      margin-bottom: 3.5rem;
+      break-inside: avoid;
+    }
+    .screen-block h2 {
+      font-size: 1.15rem;
+      margin: 0 0 1rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+    .screen-block h2 span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) 1fr;
+      gap: 1.25rem 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      .stage { grid-template-columns: 1fr; }
+    }
+
+    /* Phone frame */
+    .phone {
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      border: 2px solid #cbb89a;
+      border-radius: 1.4rem;
+      background: var(--bg);
+      box-shadow: 0 10px 30px rgba(42, 34, 31, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+    .phone.cook { background: var(--cook-bg); }
+    .phone-inner {
+      padding: 0.85rem 0.85rem 4.2rem;
+      min-height: 520px;
+      position: relative;
+    }
+    .phone.cook .phone-inner { padding-bottom: 1rem; min-height: 560px; }
+
+    .phone-shot {
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      position: relative;
+      border: 2px solid #cbb89a;
+      border-radius: 1.4rem;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(42, 34, 31, 0.08);
+    }
+    .phone-shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .phone-shot .mark {
+      position: absolute;
+      z-index: 2;
+    }
+    .phone-shot-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .nav {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      border-top: 1.5px solid var(--gold);
+      background: rgba(255, 253, 248, 0.95);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 0.35rem 0.25rem 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .nav .on {
+      background: var(--accent);
+      color: var(--on-accent);
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.2rem;
+      display: inline-block;
+    }
+    .nav span {
+      color: var(--ink-muted);
+      padding: 0.35rem 0.2rem;
+      display: inline-block;
+    }
+
+    .stars { color: var(--gold); font-size: 0.7rem; letter-spacing: 0.15em; margin-bottom: 0.15rem; }
+    .title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.2rem; }
+    .lead-sm { font-size: 0.7rem; color: var(--ink-muted); margin: 0 0 0.75rem; }
+
+    .search {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 0.7rem;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      margin-bottom: 0.6rem;
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.7rem; }
+    .chip {
+      font-size: 0.65rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 0.2rem 0.5rem;
+      color: var(--ink-muted);
+    }
+    .chip.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+    .group-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin: 0.5rem 0 0.35rem;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 0.7rem;
+      padding: 0.45rem 0.55rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.78rem;
+    }
+    .row strong { flex: 1; font-weight: 700; }
+    .mini-btn {
+      font-size: 0.62rem;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: var(--bg-deep);
+      border-radius: 0.45rem;
+      padding: 0.25rem 0.4rem;
+      white-space: nowrap;
+    }
+    .draft-tag {
+      font-size: 0.58rem;
+      color: var(--draft);
+      border: 1px solid #e2d4b4;
+      border-radius: 999px;
+      padding: 0.1rem 0.35rem;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 0.9rem;
+      padding: 0.75rem;
+      margin-bottom: 0.65rem;
+      box-shadow: 0 1px 0 rgba(42, 34, 31, 0.05);
+    }
+    .card h3 {
+      margin: 0 0 0.45rem;
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.06em;
+    }
+    .steps-guide {
+      font-size: 0.68rem;
+      color: var(--ink);
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+    .field {
+      border: 1px solid var(--line);
+      background: var(--bg-deep);
+      border-radius: 0.55rem;
+      min-height: 3.2rem;
+      margin: 0.45rem 0;
+      padding: 0.4rem;
+      font-size: 0.68rem;
+      color: var(--ink-muted);
+    }
+    .btn-primary {
+      display: block;
+      text-align: center;
+      background: var(--accent);
+      color: var(--on-accent);
+      font-weight: 700;
+      font-size: 0.78rem;
+      border-radius: 0.65rem;
+      padding: 0.55rem;
+    }
+    .btn-secondary {
+      display: block;
+      text-align: center;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      font-weight: 700;
+      font-size: 0.72rem;
+      border-radius: 0.65rem;
+      padding: 0.5rem;
+    }
+    .btn-row { display: flex; flex-direction: column; gap: 0.35rem; margin: 0.65rem 0; }
+
+    .section-h {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--ink-muted);
+      margin: 0.7rem 0 0.35rem;
+    }
+    .ing-row, .step-row {
+      border-bottom: 1px solid var(--line);
+      padding: 0.35rem 0;
+      font-size: 0.78rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .step-num {
+      width: 1.35rem; height: 1.35rem;
+      border-radius: 999px;
+      background: rgba(62, 207, 142, 0.2);
+      color: var(--accent-ink);
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .timer-chip {
+      display: inline-block;
+      margin-top: 0.25rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: var(--accent);
+      color: var(--on-accent);
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+    }
+
+    .today-empty {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
+      border: 1px solid rgba(126, 200, 227, 0.35);
+      min-height: 11.5rem;
+      background:
+        radial-gradient(ellipse 110% 70% at 50% 100%, rgba(126, 200, 227, 0.55) 0%, transparent 62%),
+        linear-gradient(180deg, #071428 0%, #16345c 34%, #2f6f9a 68%, #7ec8e3 100%);
+      padding: 2rem 1rem 1.75rem;
+      font-size: 0.78rem;
+      color: #f4f8fc;
+      text-align: center;
+      text-shadow: 0 1px 8px rgba(7, 20, 40, 0.55);
+    }
+    .today-empty .kicker {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      color: rgba(244, 248, 252, 0.85);
+      font-weight: 700;
+      margin-bottom: 0.55rem;
+    }
+    .today-empty p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    .btn-disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .cook-tabs { display: flex; gap: 0.35rem; overflow: hidden; margin-bottom: 0.75rem; }
+    .cook-tab {
+      font-size: 0.68rem;
+      font-weight: 700;
+      border: 1.5px solid var(--gold);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 0.35rem 0.55rem;
+      white-space: nowrap;
+    }
+    .cook-tab.dim { border-color: var(--line); opacity: 0.75; }
+    .cook-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      border-bottom: 1.5px solid rgba(212, 175, 55, 0.7);
+      padding-bottom: 0.35rem;
+      margin: 0 0 0.75rem;
+    }
+
+    /* Callouts */
+    .callouts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      padding-top: 0.2rem;
+    }
+    .bubble {
+      position: relative;
+      background: var(--bubble-bg);
+      border: 1.5px solid var(--supabase-green-border);
+      border-radius: 0.85rem;
+      padding: 0.7rem 0.85rem 0.7rem 0.95rem;
+      font-size: 0.88rem;
+    }
+    .bubble::before {
+      content: attr(data-n);
+      position: absolute;
+      left: -0.55rem;
+      top: 0.65rem;
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 999px;
+      background: var(--bubble);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 3px var(--bg);
+    }
+    .bubble strong {
+      display: block;
+      color: var(--accent-ink);
+      font-size: 0.78rem;
+      margin-bottom: 0.15rem;
+    }
+    .bubble p { margin: 0; color: var(--ink); }
+
+    /* Markers on phone */
+    .mark {
+      position: absolute;
+      z-index: 2;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 999px;
+      background: var(--bubble);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 2px #fff;
+    }
+
+    .note {
+      margin-top: 2rem;
+      padding: 1rem 1.1rem;
+      border: 1px dashed var(--line);
+      border-radius: 0.8rem;
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      background: rgba(255, 253, 248, 0.7);
+    }
+
+    @media print {
+      body { background: white; }
+      .screen-block { page-break-after: always; margin-bottom: 0; }
+      .note { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Quick Recipes — 各画面の機能図解</h1>
+    <p class="lead">
+      発表用。左が画面スクショ、右が吹き出し説明。ブラウザで開いてスライド用に切り抜くか、印刷→PDFでも使えます。
+    </p>
+
+    <!-- 1 目次 -->
+    <section class="screen-block" id="toc">
+      <h2>目次 <span>/ ・紙バインダーのページ番号代わり</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/01-toc.png" alt="目次画面のスクショ" />
+          <div class="mark" style="top: 24%; left: 52%;">1</div>
+          <div class="mark" style="top: 35%; left: 38%;">2</div>
+          <div class="mark" style="top: 59%; right: 3%;">3</div>
+          <div class="mark" style="top: 68%; left: 30%;">4</div>
+          <div class="mark" style="bottom: 16%; left: 50%; transform: translateX(-50%);">5</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>材料名・タイトル検索</strong>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>主菜は魚／肉、副菜は和洋中で絞り込み</strong>
+          </div>
+          <div class="bubble" data-n="3">
+            <strong>今日作るものを『今日セット』に</strong>
+          </div>
+          <div class="bubble" data-n="4">
+            <strong>主な材料をこの画面で確認できる</strong>
+          </div>
+          <div class="bubble" data-n="5">
+            <strong>画面の切り替え</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 今日セット -->
+    <section class="screen-block" id="today">
+      <h2>今日セット <span>/today ・今夜の分だけを手元に</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/05-today.png" alt="今日セット画面のスクショ" />
+          <div class="mark" style="top: 42%; left: 42%;">1</div>
+          <div class="mark" style="top: 58%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>今夜のレシピだけ並べる</strong>
+            <p>紙を何枚も抜き差ししなくてよい。順番の入れ替え・外しもここだけ。</p>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>調理モードへ</strong>
+            <p>セットした内容のまま、キッチン向けの大きい表示へ進む。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 調理 -->
+    <section class="screen-block" id="cook">
+      <h2>調理モード <span>/cook ・作業台のそばで見る画面</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/06-cook.png" alt="調理モード画面のスクショ" />
+          <div class="mark" style="top: 9%; left: 28%;">1</div>
+          <div class="mark" style="top: 34%; left: 50%; transform: translateX(-50%);">2</div>
+          <div class="mark" style="top: 78%; left: 55%;">3</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>今日セットの切替</strong>
+            <p>今夜の複数品を、タブで切り替え。別の紙が目に入らない。</p>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>大きい文字の材料・手順</strong>
+            <p>作業台のそばのスマホで読める。「レンジフード横の紙」を見上げなくてよい。</p>
+          </div>
+          <div class="bubble" data-n="3">
+            <strong>分数タップでタイマー</strong>
+            <p>分数をタップで作動 → キッチンタイマー不要。<br />並行する作業ごとにタイマーを同時に回せる。短縮・延長も可。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 追加 -->
+    <section class="screen-block" id="new">
+      <h2>レシピを追加 <span>スクショやテキストから下書きを作る画面</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/02-new.png" alt="レシピ追加画面のスクショ" />
+          <div class="mark" style="top: 32%; left: 50%; transform: translateX(-50%);">1</div>
+          <div class="mark" style="top: 62%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>スクショ／テキスト貼り付け</strong>
+            <p>ネットや写真の文字を貼って下書き化。手書きの「時間をかけたのに」を下げる入口。</p>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>名前だけ下書き</strong>
+            <p>思いついたら名前だけ置ける。完成前でも一覧に残せる。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 編集（名前・材料） -->
+    <section class="screen-block" id="edit">
+      <h2>レシピ編集 <span>レシピの内容を入力・修正する画面</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/03-edit-top.png" alt="レシピ編集画面（名前・材料）のスクショ" />
+          <div class="mark" style="top: 28%; left: 50%; transform: translateX(-50%);">1</div>
+          <div class="mark" style="top: 58%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>名前・分類・状態</strong>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>材料の入力。調味料はここではなく「手順」に入力。</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 編集（手順） -->
+    <section class="screen-block" id="edit-steps">
+      <h2>レシピ編集（手順） <span>続きの画面</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/03-edit-steps.png" alt="レシピ編集画面（手順）のスクショ" />
+          <div class="mark" style="top: 38%; left: 50%; transform: translateX(-50%);">1</div>
+          <div class="mark" style="top: 72%; left: 50%; transform: translateX(-50%);">2</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>手順の入力</strong>
+          </div>
+          <div class="bubble" data-n="2">
+            <strong>保存する</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 今日セット（空） -->
+    <section class="screen-block" id="today-empty">
+      <h2>今日セット（空のとき） <span>まだ今夜の献立を選んでいない状態</span></h2>
+      <div class="stage">
+        <div class="phone-shot">
+          <img src="screenshots/04-today-empty.png" alt="今日セット（空）画面のスクショ" />
+          <div class="mark" style="top: 44%; left: 50%; transform: translateX(-50%);">1</div>
+        </div>
+        <div class="callouts">
+          <div class="bubble" data-n="1">
+            <strong>何も入っていないときの画面は夜空のイラスト</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="note">
+      使い方のヒント：ブラウザでこのファイルを開き、各セクションを画面収録／切り抜きしてスライドへ。<br />
+      本物のスクショに差し替える場合は、同じフォルダに画像を置いてもらえれば、吹き出し位置を合わせて作り直します。
+    </p>
+  </div>
+</body>
+</html>

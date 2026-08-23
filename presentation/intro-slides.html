@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Recipes — 冒頭スライド</title>
+  <style>
+    :root {
+      /* Supabase brand */
+      --supabase-green: #3ecf8e;
+      --supabase-green-hover: #00c573;
+      --supabase-green-dark: #1f4b37;
+      --supabase-green-muted: #006239;
+      --supabase-green-soft: rgba(62, 207, 142, 0.14);
+      --supabase-dark: #171717;
+
+      --bg: #fbf6ef;
+      --surface: #fffdf8;
+      --ink: #2a221f;
+      --ink-muted: #7a6e64;
+      --line: #e8dccb;
+      --accent: var(--supabase-green);
+      --accent-hover: var(--supabase-green-hover);
+      --accent-ink: var(--supabase-green-dark);
+      --gold: #d4af37;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .deck {
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      height: 100vh;
+      padding: 3rem 2.5rem;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background:
+        radial-gradient(ellipse 100% 70% at 8% -18%, rgba(62, 207, 142, 0.16) 0%, transparent 52%),
+        radial-gradient(ellipse 80% 50% at 100% 0%, rgba(62, 207, 142, 0.1) 0%, transparent 42%),
+        var(--bg);
+    }
+    .slide.active {
+      display: flex;
+    }
+
+    .stars {
+      color: var(--gold);
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+    }
+
+    .slide h1 {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .slide .sub {
+      font-size: 1rem;
+      color: var(--ink-muted);
+      margin: 0 0 2rem;
+    }
+
+    .slide .lead {
+      font-size: clamp(1.15rem, 3vw, 1.45rem);
+      line-height: 1.75;
+      max-width: 36rem;
+      margin: 0;
+    }
+
+    .slide .lead strong {
+      color: var(--accent-ink);
+      font-weight: 700;
+    }
+
+    .slide .hook {
+      font-size: clamp(1.2rem, 3.2vw, 1.55rem);
+      line-height: 1.9;
+      max-width: 32rem;
+      margin: 0;
+    }
+
+    .slide .hook .q {
+      display: block;
+      margin-top: 1.5rem;
+      font-size: clamp(1.35rem, 3.5vw, 1.7rem);
+      font-weight: 700;
+      color: var(--accent-ink);
+    }
+
+    .why-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem;
+      max-width: 34rem;
+      text-align: left;
+    }
+    .why-list li {
+      position: relative;
+      padding: 1rem 0 1rem 1.5rem;
+      border-bottom: 1px solid var(--line);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      line-height: 1.65;
+    }
+    .why-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1.35rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .why-list em {
+      font-style: normal;
+      font-weight: 700;
+      color: var(--accent-ink);
+    }
+
+    .slide .closing-line {
+      font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+      font-weight: 700;
+      color: var(--accent-ink);
+      max-width: 28rem;
+      line-height: 1.6;
+    }
+
+    .nav-hint {
+      position: fixed;
+      bottom: 1rem;
+      right: 1.25rem;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+      opacity: 0.7;
+    }
+    .page-num {
+      position: fixed;
+      bottom: 1rem;
+      left: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+    }
+
+    @media print {
+      .slide {
+        display: flex !important;
+        page-break-after: always;
+        height: 100vh;
+      }
+      .nav-hint, .page-num { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+    <!-- スライド A：表紙 -->
+    <section class="slide active" data-slide="A">
+      <div class="stars">★ ★ ★</div>
+      <h1>Quick Recipes</h1>
+      <p class="sub">AI-Driven School 卒業制作</p>
+      <p class="lead">
+        自分専用のクイックレシピ Web アプリ<br />
+        <strong>自分で、本当に面倒をなくすツールが作れた</strong>
+      </p>
+    </section>
+
+    <!-- スライド B：フック -->
+    <section class="slide" data-slide="B">
+      <div class="stars">★ ★ ★</div>
+      <p class="hook">
+        調味料をボールに入れながら、<br />
+        レンジフードの横の紙を見上げて、<br />
+        また作業台に戻る。
+        <span class="q">その動作、何度もやっていませんか。</span>
+      </p>
+    </section>
+
+    <!-- スライド C：なぜ -->
+    <section class="slide" data-slide="C">
+      <div class="stars">★ ★ ★</div>
+      <h1 style="font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: 1.5rem;">なぜ作ったか</h1>
+      <ul class="why-list">
+        <li>
+          クイックに作れる書き方を考えながら書いたのに——<br />
+          子どもが好きじゃなくて作らなくなった。<br />
+          <em>「せっかく書いたのに」</em>
+        </li>
+        <li>
+          時間がないとき、ネットでレシピを検索して作る。<br />
+          何度も同じことを探し直すのが面倒だった。
+        </li>
+      </ul>
+      <p class="closing-line">
+        紙を捨てたいのではなく、<br />
+        手間が残らない形にしたかった。
+      </p>
+    </section>
+  </div>
+
+  <span class="page-num" id="page-num">A / 3</span>
+  <span class="nav-hint">← → で切替 · F11 で全画面</span>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const labels = ["A", "B", "C"];
+    let index = 0;
+
+    function show(i) {
+      index = Math.max(0, Math.min(i, slides.length - 1));
+      slides.forEach((s, n) => s.classList.toggle("active", n === index));
+      document.getElementById("page-num").textContent =
+        `${labels[index]} / ${slides.length}`;
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        show(index + 1);
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        show(index - 1);
+      }
+      if (e.key === "Home") show(0);
+      if (e.key === "End") show(slides.length - 1);
+    });
+
+    document.getElementById("deck").addEventListener("click", (e) => {
+      const w = window.innerWidth;
+      if (e.clientX > w * 0.55) show(index + 1);
+      else show(index - 1);
+    });
+  </script>
+</body>
+</html>
