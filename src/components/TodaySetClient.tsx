@@ -16,6 +16,7 @@ type Props = {
 
 export function TodaySetClient({ recipesById }: Props) {
   const [ids, setIds] = useState<string[]>([]);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -38,6 +39,12 @@ export function TodaySetClient({ recipesById }: Props) {
   );
 
   const missingCount = ids.length - items.length;
+
+  function clearAll() {
+    clearCookSession();
+    setIds([]);
+    setConfirmClear(false);
+  }
 
   function move(index: number, dir: -1 | 1) {
     const nextIndex = index + dir;
@@ -101,11 +108,7 @@ export function TodaySetClient({ recipesById }: Props) {
               <button
                 type="button"
                 className="btn btn-secondary min-h-9 px-3 text-sm"
-                onClick={() => {
-                  startTransition(() => {
-                    setIds(removeRecipeFromSession(recipe.id).recipeIds);
-                  });
-                }}
+                onClick={() => setIds(removeRecipeFromSession(recipe.id).recipeIds)}
               >
                 外す
               </button>
@@ -120,28 +123,40 @@ export function TodaySetClient({ recipesById }: Props) {
         </p>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Link
-          href="/cook"
-          className={`btn btn-primary flex-1 ${items.length === 0 ? "pointer-events-none opacity-50" : ""}`}
-        >
-          調理モードを開く
-        </Link>
-        <button
-          type="button"
-          className="btn btn-secondary flex-1"
-          disabled={ids.length === 0 || pending}
-          onClick={() => {
-            if (!window.confirm("今日セットをすべてクリアしますか？")) return;
-            startTransition(() => {
-              clearCookSession();
-              setIds([]);
-            });
-          }}
-        >
-          クリア
-        </button>
-      </div>
+      {confirmClear ? (
+        <div className="space-y-2 rounded-xl border border-line bg-surface px-3 py-3 shadow-[var(--shadow)]">
+          <p className="text-sm text-ink">今日セットをすべてクリアしますか？</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button type="button" className="btn btn-danger flex-1" onClick={clearAll}>
+              クリアする
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary flex-1"
+              onClick={() => setConfirmClear(false)}
+            >
+              やめる
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href="/cook"
+            className={`btn btn-primary flex-1 ${items.length === 0 ? "pointer-events-none opacity-50" : ""}`}
+          >
+            調理モードを開く
+          </Link>
+          <button
+            type="button"
+            className="btn btn-secondary flex-1"
+            disabled={ids.length === 0}
+            onClick={() => setConfirmClear(true)}
+          >
+            クリア
+          </button>
+        </div>
+      )}
     </div>
   );
 }

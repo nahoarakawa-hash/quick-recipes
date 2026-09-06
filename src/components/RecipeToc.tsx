@@ -322,10 +322,8 @@ export function RecipeToc({ recipes, initialQuery = "" }: Props) {
   function clearToday() {
     if (todayCount === 0) return;
     if (!window.confirm("今日セットをすべてクリアしますか？")) return;
-    startTransition(() => {
-      clearCookSession();
-      setTodayCount(0);
-    });
+    clearCookSession();
+    setTodayCount(0);
   }
 
   return (

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Recipes — 卒業制作 解説図解</title>
+  <style>
+    :root {
+      --supabase-green: #3ecf8e;
+      --supabase-green-muted: #006239;
+      --supabase-green-soft: rgba(62, 207, 142, 0.16);
+      --supabase-green-border: rgba(62, 207, 142, 0.4);
+
+      --bg: #fbf6ef;
+      --surface: #fffdf8;
+      --ink: #2a221f;
+      --ink-muted: #7a6e64;
+      --line: #e8dccb;
+      --accent: var(--supabase-green);
+      --accent-ink: #0f8f5a; /* 発表スライドの強調文字と同じ */
+      --heading-green: var(--accent-ink);
+      --gold: #d4af37;
+      --shadow: 0 1px 2px rgba(42, 34, 31, 0.05), 0 8px 24px rgba(42, 34, 31, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 100% 70% at 8% -18%, rgba(62, 207, 142, 0.16) 0%, transparent 52%),
+        radial-gradient(ellipse 80% 50% at 100% 0%, rgba(62, 207, 142, 0.1) 0%, transparent 42%),
+        var(--bg);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3.5rem;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, #0f8f5a 0%, #167a4f 45%, #0c6b45 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 2rem 1.75rem 1.85rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -36px;
+      top: -36px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(62, 207, 142, 0.18);
+    }
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.16);
+      margin-bottom: 0.85rem;
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 {
+      margin: 0 0 0.45rem;
+      font-size: clamp(1.45rem, 3.5vw, 1.85rem);
+      line-height: 1.3;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+    .hero .sub {
+      margin: 0;
+      opacity: 0.92;
+      font-size: 0.95rem;
+      max-width: 36em;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem 1.1rem;
+      margin-top: 1.25rem;
+      font-size: 0.82rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-meta a {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.35rem 1.3rem 1.45rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+    section h2 {
+      margin: 0 0 0.3rem;
+      font-size: 1.1rem;
+      color: var(--heading-green);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .num {
+      flex-shrink: 0;
+      width: 1.65rem;
+      height: 1.65rem;
+      border-radius: 6px;
+      background: var(--heading-green);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+    .section-lead {
+      margin: 0 0 1rem;
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+    }
+    p { margin: 0 0 0.75rem; }
+    p:last-child { margin-bottom: 0; }
+    strong.em { color: var(--accent-ink); font-weight: 700; }
+
+    .shot-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.85rem;
+      margin-top: 0.85rem;
+    }
+    @media (max-width: 640px) {
+      .shot-row { grid-template-columns: 1fr; max-width: 280px; margin-left: auto; margin-right: auto; }
+    }
+    .shot {
+      margin: 0;
+      text-align: center;
+    }
+    .shot img {
+      display: block;
+      width: 100%;
+      max-width: 260px;
+      margin: 0 auto;
+      border-radius: 1.1rem;
+      border: 2px solid #cbb89a;
+      box-shadow: 0 8px 22px rgba(42, 34, 31, 0.08);
+      background: var(--bg);
+    }
+    .shot figcaption {
+      margin-top: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+
+    .before-layout {
+      display: grid;
+      grid-template-columns: minmax(160px, 42%) 1fr;
+      gap: 1rem 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) {
+      .before-layout { grid-template-columns: 1fr; }
+    }
+    .before-photo {
+      margin: 0;
+    }
+    .before-photo img {
+      display: block;
+      width: 100%;
+      border-radius: 0.75rem;
+      border: 2px solid var(--line);
+      box-shadow: 0 6px 18px rgba(42, 34, 31, 0.08);
+    }
+    .before-photo figcaption {
+      margin-top: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--ink-muted);
+    }
+
+    .pain-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 0.45rem;
+    }
+    .pain-list li {
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #faf6ef;
+      font-size: 0.88rem;
+    }
+    .pain-list li span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      margin-top: 0.2rem;
+    }
+
+    .reason-box {
+      margin-top: 0.85rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      background: var(--supabase-green-soft);
+      border: 1px solid var(--supabase-green-border);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--heading-green);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 700px) {
+      .flow { grid-template-columns: 1fr; }
+    }
+    .flow-step {
+      background: var(--heading-green);
+      color: #fff;
+      border-radius: 10px;
+      padding: 0.75rem 0.65rem;
+      text-align: center;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+    .flow-step .fs {
+      display: block;
+      font-size: 0.68rem;
+      opacity: 0.75;
+      margin-bottom: 0.2rem;
+      font-weight: 700;
+    }
+    .flow-step:nth-child(2) { background: #12a066; }
+    .flow-step:nth-child(3) { background: #0c7a4d; }
+
+    .use-block {
+      display: grid;
+      grid-template-columns: minmax(140px, 200px) 1fr;
+      gap: 0.85rem 1.1rem;
+      align-items: start;
+      padding: 0.85rem 0;
+      border-top: 1px dashed var(--line);
+    }
+    .use-block:first-of-type { border-top: none; padding-top: 0; }
+    @media (max-width: 640px) {
+      .use-block {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+      .use-block .use-text { text-align: left; width: 100%; }
+    }
+    .use-block .phone {
+      width: 100%;
+      max-width: 200px;
+      margin: 0;
+    }
+    .use-block .phone img {
+      display: block;
+      width: 100%;
+      border-radius: 1rem;
+      border: 2px solid #cbb89a;
+      box-shadow: 0 6px 18px rgba(42, 34, 31, 0.08);
+    }
+    .use-text h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.95rem;
+      color: var(--heading-green);
+    }
+    .use-text p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--ink);
+    }
+    .use-note {
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px dashed var(--line);
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .point-box {
+      border-radius: 12px;
+      padding: 1rem 0.95rem;
+      border: 1px solid var(--line);
+      background: #faf6ef;
+    }
+    .point-box h3 {
+      margin: 0 0 0.55rem;
+      font-size: 0.88rem;
+      color: var(--heading-green);
+    }
+    .point-box ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.85rem;
+    }
+    .point-box li { margin: 0.3rem 0; }
+    .point-box.struggle {
+      background: #fff8f0;
+      border-color: #ecd9c0;
+    }
+    .point-box.struggle h3 { color: #8a5a2b; }
+
+    .tech-line {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--ink-muted);
+    }
+    .tech-line strong { color: var(--ink); font-weight: 700; }
+
+    .footer {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="hero">
+      <div class="hero-badge">AI-Driven School 卒業制作 ／ スクール運営向け解説</div>
+      <h1>Quick Recipes</h1>
+      <p class="sub">料理をすばやく作るための、自分専用レシピ Web アプリ。</p>
+      <div class="hero-meta">
+        <span>実物：<a href="https://quick-recipes-opal.vercel.app" target="_blank" rel="noopener">quick-recipes-opal.vercel.app</a></span>
+      </div>
+    </header>
+
+    <!-- 1 これは何か -->
+    <section>
+      <h2><span class="num">1</span>これは何か</h2>
+      <p class="section-lead">紙のレシピ集でやっていた「まとめて・今夜分だけ出して・調理中に見る」を、スマホで続けられるようにしたアプリです。</p>
+      <div class="shot-row">
+        <figure class="shot">
+          <img src="screenshots/01-toc.png" alt="目次画面" />
+          <figcaption>目次（レシピ一覧）</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="screenshots/06-cook.png" alt="調理モード画面" />
+          <figcaption>調理モード（キッチン向け表示）</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 2 解決する面倒・課題 -->
+    <section>
+      <h2><span class="num">2</span>解決する面倒・課題</h2>
+      <p class="section-lead">よく作る料理は紙にまとめて、レンジフード横に張って作っていました。便利だった一方で、次の手間が残っていました。</p>
+      <div class="before-layout">
+        <figure class="before-photo">
+          <img src="screenshots/00-paper-on-hood.png" alt="レンジフード横にとめた手書きレシピ" />
+        </figure>
+        <ul class="pain-list">
+          <li>
+            <strong>探す</strong>
+            <span>今日の紙をバインダーから抜く。「どのあたりにあったっけ？」</span>
+          </li>
+          <li>
+            <strong>新しく作った料理のレシピを紙に書く</strong>
+            <span>作り方を覚えているうちにレシピ集へ書く手間。</span>
+          </li>
+          <li>
+            <strong>また検索する</strong>
+            <span>写す作業をさぼっていると、同じレシピを何度もネットで探し直す。</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3 作りたいと思った理由 -->
+    <section>
+      <h2><span class="num">3</span>作りたいと思った理由</h2>
+      <p>紙のやり方自体は便利で、やめたいわけではありませんでした。</p>
+      <div class="reason-box">
+        紙を捨てたいのではなく、<strong class="em">便利なまとめ方を続けるために、手間をかけないやり方</strong>にしたかった。
+      </div>
+    </section>
+
+    <!-- 4 実物で見る使い方 -->
+    <section>
+      <h2><span class="num">4</span>実物で見る使い方</h2>
+      <p class="section-lead">毎日の流れは「目次 → 今日セット → 調理」です。</p>
+
+      <div class="flow">
+        <div class="flow-step"><span class="fs">STEP 1</span>目次で探す・絞る</div>
+        <div class="flow-step"><span class="fs">STEP 2</span>今日セットへ集める</div>
+        <div class="flow-step"><span class="fs">STEP 3</span>調理モードで作る</div>
+      </div>
+
+      <div class="use-block">
+        <figure class="phone">
+          <img src="screenshots/01-toc.png" alt="目次" />
+        </figure>
+        <div class="use-text">
+          <h3>目次</h3>
+          <p>材料名・タイトルで検索。主菜は魚／肉、副菜は和洋中で絞り込み。「今日に追加」で今夜分へ送れます。</p>
+        </div>
+      </div>
+
+      <div class="use-block">
+        <figure class="phone">
+          <img src="screenshots/05-today.png" alt="今日セット" />
+        </figure>
+        <div class="use-text">
+          <h3>今日セット</h3>
+          <p>今夜のレシピだけが並びます。紙の抜き差しなしで、順番の入れ替え・外しもここだけ。</p>
+        </div>
+      </div>
+
+      <div class="use-block">
+        <figure class="phone">
+          <img src="screenshots/06-cook.png" alt="調理モード" />
+        </figure>
+        <div class="use-text">
+          <h3>調理モード</h3>
+          <p>大きい文字で材料・手順を表示。タブで品を切替。手順の分数をタップするとタイマーが動き、並行作業も同時に回せます。</p>
+        </div>
+      </div>
+
+      <p class="use-note">
+        <strong>レシピの入れ方（要約）</strong>：スクショやテキストを貼って下書きを作るか、名前だけ置いてあとから編集。材料・手順を入力して保存します。
+      </p>
+    </section>
+
+    <!-- 5 解決できたこと・つくってよかったこと -->
+    <section>
+      <h2><span class="num">5</span>解決できたこと／つくってよかったこと</h2>
+      <p class="section-lead">もともと減らしたかったのは、レシピを探す・紙に書く手間でした。使ってみると、それ以外の効果もありました。</p>
+      <div class="two-col">
+        <div class="point-box">
+          <h3>解決できたこと</h3>
+          <ul>
+            <li>レシピを探す手間・紙に書く手間をなくせた</li>
+            <li>今夜分だけを手元に集め、紙の抜き差しが不要になった</li>
+            <li>目線移動が減って調理がスピードアップした</li>
+            <li>目次で材料を確認し、買い物リストをつくりやすくなった</li>
+            <li>分類でソートでき、献立作りがしやすくなった</li>
+            <li>タイマーをレシピに組み込み、セットする手間をなくした。複数のタイマーを同時に動かせるようになった</li>
+          </ul>
+        </div>
+        <div class="point-box">
+          <h3>つくってよかったこと</h3>
+          <ul>
+            <li>便利だと思っていたやり方の中にも不便があった、と気づけた</li>
+            <li>自分の献立・調理の流れに合わせたツールを、毎日使える形まで持っていけた</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 工夫・苦戦 -->
+    <section>
+      <h2><span class="num">6</span>工夫した点／苦戦した点</h2>
+      <div class="two-col">
+        <div class="point-box">
+          <h3>工夫した点</h3>
+          <ul>
+            <li>献立の考え方に合わせた目次（検索・主菜／副菜の絞り込み）</li>
+            <li>今夜分だけを「今日セット」に集約</li>
+            <li>調理中向けの大きい表示と、分数タップのタイマー</li>
+            <li>スクショ／テキスト貼り付けや、名前だけの下書きで登録のハードルを下げる</li>
+          </ul>
+        </div>
+        <div class="point-box struggle">
+          <h3>苦戦した点</h3>
+          <ul>
+            <li>色合いをはじめ、見やすく自分好みの UI に仕上げること</li>
+            <li>細かい操作の詰め（材料・手順の行を自動追加、タイマーの調整や音など）</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 技術 -->
+    <section>
+      <h2><span class="num">7</span>技術の概要</h2>
+      <p class="tech-line">
+        <strong>Next.js / React / TypeScript / Supabase / Vercel</strong>
+        で実装・公開しています。
+      </p>
+    </section>
+
+    <p class="footer">Quick Recipes ／ AI-Driven School 卒業制作</p>
+  </div>
+</body>
+</html>
