@@ -564,6 +564,9 @@ export function CookMode({ recipesById, initialRecipeId }: Props) {
               ← 今日セット
             </Link>
             <p className="text-xs tracking-[0.16em] text-cook-gold">COOK MODE</p>
+            <Link href="/" className="text-sm font-semibold text-accent-ink">
+              目次 →
+            </Link>
           </div>
         </header>
 
